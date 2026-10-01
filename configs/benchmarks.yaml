@@ -1,0 +1,199 @@
+# Benchmark registry. Every dataset fact below (revision, configs, splits, licence, label counts)
+# was read from the HF Hub API / datasets-server on 2026-10-01; anything not yet verifiable is
+# marked TODO(verify). Revisions for afrixnli/afrimmlu/afrimgsm/belebele match the ones the
+# top40-gold benchmark blocklist was built against.
+#
+# Language scope: languages the target was trained on, plus the project's South African
+# languages, intersected with what each dataset ships. `subsets` maps a language to its HF
+# config name (or `language_column` value) when that differs from the language code.
+#
+# Buckets: seen_task = the SFT mix trains this task (mafand MT -> translation,
+# masakhanews -> topic classification); held_out = task not in the mix; retention = English.
+# Licences are from HF card metadata; confirming them is still an open decision.
+
+benchmarks:
+  - id: afrixnli
+    dataset: masakhane/afrixnli
+    revision: e3ca06b30f3e7af2a86f6c8609ea76fee326bc56
+    type: classification
+    capability: nli
+    metric: accuracy
+    chance_level: 0.3333333333
+    bucket: held_out
+    languages: [amh, eng, ewe, fra, hau, ibo, kin, lin, lug, orm, sna, sot, swa, twi, wol, xho,
+                yor, zul]
+    split: test
+    fewshot_split: validation
+    license: apache-2.0
+
+  - id: afrimmlu
+    dataset: masakhane/afrimmlu
+    revision: 96f247619673906ae4c321a3232afc67b98ea57e
+    type: classification
+    capability: knowledge
+    metric: accuracy
+    chance_level: 0.25
+    bucket: held_out
+    languages: [amh, eng, ewe, fra, hau, ibo, kin, lin, lug, orm, sna, sot, swa, twi, wol, xho,
+                yor, zul]
+    split: test
+    fewshot_split: dev
+    license: apache-2.0
+
+  - id: afrimgsm
+    dataset: masakhane/afrimgsm
+    revision: 8e4268d2b94941f18f63f694cf48e4ae26fbec65
+    type: generation
+    capability: math
+    metric: exact_match
+    chance_level: 0.0
+    bucket: held_out
+    # `vai` is also shipped but is neither trained nor South African.
+    languages: [amh, eng, ewe, fra, hau, ibo, kin, lin, lug, orm, sna, sot, swa, twi, wol, xho,
+                yor, zul]
+    split: test
+    fewshot_split: train
+    max_new_tokens: 512
+    license: apache-2.0
+
+  - id: sib200
+    dataset: Davlan/sib200
+    revision: 38977a667f6fc264d5c26ec57a01e16db040b358
+    type: classification
+    capability: topic_classification
+    metric: accuracy
+    extra_metrics: [macro_f1]
+    chance_level: 0.1428571429 # 7 topics, per the build prompt; TODO(verify) label set in Phase 3
+    bucket: seen_task
+    # `aka_Latn` is a separate subset from `twi_Latn` and is not used (would double-count Twi).
+    languages: [afr, amh, ary, arz, bam, eng, ewe, fon, fra, hau, ibo, kin, lin, lug, luo, mos,
+                nso, nya, orm, plt, run, sna, som, sot, ssw, swa, tir, tsn, tso, twi, wol, xho,
+                yor, zul]
+    subsets: {afr: afr_Latn, amh: amh_Ethi, ary: ary_Arab, arz: arz_Arab, bam: bam_Latn,
+              eng: eng_Latn, ewe: ewe_Latn, fon: fon_Latn, fra: fra_Latn, hau: hau_Latn,
+              ibo: ibo_Latn, kin: kin_Latn, lin: lin_Latn, lug: lug_Latn, luo: luo_Latn,
+              mos: mos_Latn, nso: nso_Latn, nya: nya_Latn, orm: gaz_Latn, plt: plt_Latn,
+              run: run_Latn, sna: sna_Latn, som: som_Latn, sot: sot_Latn, ssw: ssw_Latn,
+              swa: swh_Latn, tir: tir_Ethi, tsn: tsn_Latn, tso: tso_Latn, twi: twi_Latn,
+              wol: wol_Latn, xho: xho_Latn, yor: yor_Latn, zul: zul_Latn}
+    split: test
+    fewshot_split: train
+    license: cc-by-sa-4.0
+
+  - id: belebele
+    dataset: facebook/belebele
+    revision: 7899cdfa4e1e0d733fd77c848e2c273cb1d32be2
+    type: classification
+    capability: reading_comprehension
+    metric: accuracy
+    chance_level: 0.25
+    bucket: held_out
+    languages: [afr, amh, ary, arz, bam, eng, fra, hau, ibo, kin, lin, lug, luo, nso, nya, orm,
+                plt, sna, som, sot, ssw, swa, tir, tsn, tso, wol, xho, yor, zul]
+    subsets: {afr: afr_Latn, amh: amh_Ethi, ary: ary_Arab, arz: arz_Arab, bam: bam_Latn,
+              eng: eng_Latn, fra: fra_Latn, hau: hau_Latn, ibo: ibo_Latn, kin: kin_Latn,
+              lin: lin_Latn, lug: lug_Latn, luo: luo_Latn, nso: nso_Latn, nya: nya_Latn,
+              orm: gaz_Latn, plt: plt_Latn, sna: sna_Latn, som: som_Latn, sot: sot_Latn,
+              ssw: ssw_Latn, swa: swh_Latn, tir: tir_Ethi, tsn: tsn_Latn, tso: tso_Latn,
+              wol: wol_Latn, xho: xho_Latn, yor: yor_Latn, zul: zul_Latn}
+    split: test
+    fewshot_split: null # the dataset only ships a test split; few-shot handling decided in Phase 3
+    license: cc-by-sa-4.0
+
+  - id: injongo
+    dataset: masakhane/InjongoIntent
+    revision: fe4be3882a1614161dfe231ec793197bb74f4b44
+    type: classification
+    capability: intent
+    metric: accuracy
+    extra_metrics: [slot_f1] # slot spans are in the `spans` column of the same dataset
+    chance_level: 0.025 # 40 intents (verified on zul/eng/xho/sot test); TODO(verify) all configs
+    bucket: held_out
+    languages: [amh, eng, ewe, hau, ibo, kin, lin, lug, orm, sna, sot, swa, twi, wol, xho, yor,
+                zul]
+    split: test
+    fewshot_split: train
+    license: apache-2.0
+
+  - id: flores_plus
+    dataset: openlanguagedata/flores_plus
+    revision: d19edbb779a279ed80e77820970c8da7a92cb192
+    type: generation
+    capability: translation
+    metric: chrf++
+    bucket: seen_task
+    # eng -> xx. Target languages from the devtest/ file listing. Gated: needs HF_TOKEN.
+    # TODO(verify): config naming and columns once a token is available (repo is gated).
+    # TODO(decide): Twi ships as two variants (twi_Latn_akua1239 Akuapem, twi_Latn_asan1239
+    # Asante); Twi is left out until one is chosen.
+    languages: [afr, amh, ary, arz, bam, ewe, fon, fra, hau, ibo, kin, lin, lug, luo, mos, nso,
+                nya, orm, plt, run, sna, som, sot, ssw, swa, tir, tsn, tso, wol, xho, yor, zul]
+    subsets: {afr: afr_Latn, amh: amh_Ethi, ary: ary_Arab, arz: arz_Arab, bam: bam_Latn,
+              ewe: ewe_Latn, fon: fon_Latn, fra: fra_Latn, hau: hau_Latn, ibo: ibo_Latn,
+              kin: kin_Latn, lin: lin_Latn, lug: lug_Latn, luo: luo_Latn, mos: mos_Latn,
+              nso: nso_Latn, nya: nya_Latn, orm: gaz_Latn, plt: plt_Latn, run: run_Latn,
+              sna: sna_Latn, som: som_Latn, sot: sot_Latn, ssw: ssw_Latn, swa: swh_Latn,
+              tir: tir_Ethi, tsn: tsn_Latn, tso: tso_Latn, wol: wol_Latn, xho: xho_Latn,
+              yor: yor_Latn, zul: zul_Latn}
+    split: devtest
+    fewshot_split: dev
+    license: cc-by-sa-4.0
+
+  - id: afriscience_mt
+    dataset: dsfsi/afriscience_mt
+    revision: 5e7b8238d562e9b8abb2ff1fda629d5a017240fd
+    type: generation
+    capability: science_translation
+    metric: chrf++
+    bucket: seen_task
+    config: corpus
+    language_column: lang_pair # eng -> xx; 970 test rows per pair
+    languages: [amh, hau, lug, nso, yor, zul]
+    subsets: {amh: eng-amh, hau: eng-hau, lug: eng-lug, nso: eng-nso, yor: eng-yor, zul: eng-zul}
+    split: test
+    fewshot_split: dev
+    license: apache-2.0
+
+  - id: afrimcqa
+    enabled: false # TODO: image input (Gemma-4 supports it) or a text-only ablation, later phase
+    dataset: Atnafu/Afri-MCQA
+    revision: 8b8c53df57b0c2cf9d9798c53515ba1dd14df669
+    type: classification
+    capability: multimodal_qa
+    metric: accuracy
+    chance_level: 0.25 # 4 option columns; TODO(verify) rows with empty options
+    bucket: held_out
+    input_modalities: [text, image]
+    # Kikuyu_* is also shipped but is neither trained nor South African.
+    # Dev splits live in separate <Language>_dev configs; wire up when enabled.
+    languages: [amh, hau, ibo, kin, lin, lug, nya, orm, som, sot, tir, tsn, twi, yor, zul]
+    subsets: {amh: Amharic_test, hau: Hausa_test, ibo: Igbo_test, kin: Kinyarwanda_test,
+              lin: Lingala_test, lug: Luganda_test, nya: Chichewa_test, orm: Oromo_test,
+              som: Somali_test, sot: Sesotho_test, tir: Tigrinya_test, tsn: Setswana_test,
+              twi: Akan_Twi_test, yor: Yoruba_test, zul: Zulu_test}
+    split: test
+    license: cc-by-nc-4.0
+
+  - id: english_mmlu
+    dataset: cais/mmlu
+    revision: c30699e8356da336a370243923dbaf21066bb9fe
+    type: classification
+    capability: english_knowledge
+    metric: accuracy
+    chance_level: 0.25
+    bucket: retention
+    config: all
+    languages: [eng]
+    split: test
+    fewshot_split: dev
+    license: mit
+
+  - id: english_perplexity
+    enabled: false # TODO(decide): which held-out English text to use (open question)
+    dataset: local:/TODO/english-heldout.jsonl
+    type: perplexity
+    capability: english_lm
+    metric: perplexity
+    bucket: retention
+    languages: [eng]
+    split: test

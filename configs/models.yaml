@@ -1,0 +1,56 @@
+# Model registry. Roles:
+#   base            exactly one. The checkpoint our adapters were trained from; every target is
+#                   compared against it.
+#   plain_baseline  zero or one. Our default SFT recipe. Delete the entry if it doesn't exist
+#                   yet; the report then labels "beats our own recipe" claims as not yet verified.
+#                   Sign-off: project lead.
+#   reference       any number. Extra upstream checkpoints shown alongside (never used as base).
+#   target          the checkpoints under evaluation. Explicit paths only: never pick a
+#                   checkpoint via loss-based aliases.
+#   external        other teams' released models.
+
+reference_models:
+  - id: gemma-4-e2b-it
+    role: base
+    checkpoint: hf://google/gemma-4-E2B-it
+    description: Instruction-tuned Gemma-4-E2B; parent checkpoint of the AfriGemma LoRA adapters.
+  - id: gemma-4-e2b-pt
+    role: reference
+    checkpoint: hf://google/gemma-4-E2B
+    description: Pretrained (non-instruction-tuned) Gemma-4-E2B, for context only.
+  # - id: afrigemma-plain-baseline
+  #   role: plain_baseline
+  #   checkpoint: /absolute/path/to/plain-baseline/model
+  #   adapter_of: gemma-4-e2b-it
+  #   sft_data: {version: ..., path: ...}
+
+target_models:
+  - &top40_gold
+    id: afrigemma-top40-gold-step6499
+    role: target
+    checkpoint: /home/neobotlhale/_models/afrigemma-sft-top40-gold/checkpoints/epoch_3_step_6499/model
+    adapter_of: gemma-4-e2b-it
+    description: LoRA r=16 on Gemma-4-E2B-it, top40-gold-v1 mix, final checkpoint (step 6499).
+    sft_data:
+      version: top40-gold-v1-core@sha256:c0878d5f9292a71afb396405fd2cdb81bc51f4a889c76c54127a7ee707bf592b
+      path: /home/neobotlhale/_models/afrigemma-sft-top40-gold/training-data/processed/train
+      text_fields: ["messages[].content"]
+      # Languages present in the train split, counted from the `language` field on 2026-10-01
+      # (swh folded into swa; 57,616 masakhaner1 rows are tagged "unknown").
+      languages: [amh, ary, arz, bam, bbj, eng, ewe, fon, fra, hau, ibo, kin, lin, lug, luo,
+                  mos, nso, nya, orm, pcm, plt, run, sna, som, swa, tir, tsn, tso, twi, wol,
+                  xho, yor, zul]
+  - <<: *top40_gold
+    id: afrigemma-top40-gold-step5999
+    checkpoint: /home/neobotlhale/_models/afrigemma-sft-top40-gold/checkpoints/epoch_2_step_5999/model
+    description: Same run, step 5999.
+  - <<: *top40_gold
+    id: afrigemma-top40-gold-step3999
+    checkpoint: /home/neobotlhale/_models/afrigemma-sft-top40-gold/checkpoints/epoch_1_step_3999/model
+    description: Same run, step 3999.
+  - <<: *top40_gold
+    id: afrigemma-top40-gold-step1999
+    checkpoint: /home/neobotlhale/_models/afrigemma-sft-top40-gold/checkpoints/epoch_0_step_1999/model
+    description: Same run, step 1999.
+
+external_models: []

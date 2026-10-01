@@ -1,0 +1,52 @@
+# One invocation: which models x benchmarks, how to prompt, and rerun overrides.
+# harness_version is NOT set here: it is read from the installed package version.
+
+run_id: 2026-10-01-top40-gold-vs-base
+models_file: models.yaml
+benchmarks_file: benchmarks.yaml
+
+# Targets / externals to evaluate. Every model under reference_models in models.yaml (base,
+# plain_baseline, extra references) is always included and served from cache once it has run.
+# Other registered checkpoints of the same run: afrigemma-top40-gold-step5999,
+# afrigemma-top40-gold-step3999, afrigemma-top40-gold-step1999.
+models: [afrigemma-top40-gold-step6499]
+
+benchmarks: [afrixnli, afrimmlu, afrimgsm, sib200, belebele, injongo, flores_plus,
+             afriscience_mt, english_mmlu]
+# Not selectable yet: afrimcqa (scaffold, needs image input), english_perplexity (no text chosen).
+
+prompting:
+  shots: [0, 5]
+  headline_shots: 0 # tables/insights headline the 0-shot numbers; 5-shot shown alongside
+  chat_template: true # all current models are Gemma-4-E2B-it derivatives
+  mc_scoring: loglikelihood # or `generate` (generate-then-parse; unparseable counts as wrong)
+  decoding:
+    strategy: greedy
+    max_new_tokens: 256 # benchmarks.yaml may override per benchmark
+
+force_rerun_all: false
+force_rerun: []
+#  - model: afrigemma-top40-gold-step6499
+#    benchmark: afrimmlu
+#    reason: "re-ran decontamination on the SFT mix, needs fresh numbers"
+
+# All score thresholds are in points on a 0-100 scale (accuracy 0.341 -> 34.1 points).
+thresholds:
+  noise_threshold: 1.0 # agreed: ~1 point (open decision answered 2026-09-30)
+  retention_tolerance: 3.0 # agreed: English MMLU drop of > 3 points is flagged
+  perplexity_tolerance_pct: null # TODO: team to agree; while null the report says "tolerance not set"
+  near_chance_margin: 2.0 # = 0.02 on a 0-1 scale. TODO: team to agree
+
+# Confusion-matrix embed triggers (fractions of predictions). Chosen by the implementer.
+confusion:
+  class_collapse_pct: 0.6 # one class takes > 60% of predictions
+  position_bias_pct: 0.5 # one answer position (e.g. option A) takes > 50% of predictions
+  outlier_z: 2.0 # a language whose prediction distribution is > 2 SD from the others
+
+bootstrap:
+  n_resamples: 1000
+  seed: 0
+  confidence: 0.95
+
+results_dir: results
+reports_dir: reports
