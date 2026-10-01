@@ -6,8 +6,14 @@ readme = "docs/EVAL_ARCHITECTURE.md"
 requires-python = ">=3.11"
 dependencies = [
     "huggingface_hub==2.0.0",
+    "jinja2==3.1.6",
+    "numpy==2.5.3",
+    "pandas==3.0.6",
+    "pyarrow==25.0.1",
     "pydantic==2.13.5",
     "pyyaml==6.0.3",
+    "sacrebleu==2.6.0",
+    "scikit-learn==1.9.1",
 ]
 
 [project.optional-dependencies]
