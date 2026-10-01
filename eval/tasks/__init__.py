@@ -38,6 +38,7 @@ class Task:
     """One benchmark. Subclasses define how a dataset row becomes an Example."""
 
     shot_policy: ShotPolicy = "fixed"
+    text_fields: tuple[str, ...] = ()  # row columns holding benchmark text (for decontamination)
 
     def __init__(self, benchmark_id: str) -> None:
         self.benchmark_id = benchmark_id
@@ -50,6 +51,10 @@ class Task:
 
     def example(self, row: Row, index: int, language: str) -> Example:
         raise NotImplementedError
+
+    def texts(self, row: Row) -> list[str]:
+        """The benchmark's own text in a row, without any prompt wording."""
+        return [str(row[f]) for f in self.text_fields if row.get(f)]
 
     def examples(
         self, loader: DataLoader, benchmark: BenchmarkSpec, language: str, split: str
@@ -67,6 +72,8 @@ class Task:
 
 
 class AfriXNLI(Task):
+    text_fields = ("premise", "hypothesis")
+
     def example(self, row: Row, index: int, language: str) -> Example:
         query = self.template.format(premise=row["premise"], hypothesis=row["hypothesis"])
         return self._choice(str(index), language, query, int(row["label"]))
@@ -76,6 +83,7 @@ class MMLU(Task):
     """AfriMMLU (choices: stringified list, answer: letter) and cais/mmlu (list, class index)."""
 
     shot_policy: ShotPolicy = "same_group"
+    text_fields = ("question",)
 
     def example(self, row: Row, index: int, language: str) -> Example:
         choices = row["choices"]
@@ -94,6 +102,7 @@ class Belebele(Task):
     # The dataset has only a test split, so shots come from test questions about a *different*
     # passage (several questions share one passage).
     shot_policy: ShotPolicy = "other_group"
+    text_fields = ("flores_passage", "question")
 
     def example(self, row: Row, index: int, language: str) -> Example:
         query = self.template.format(
@@ -111,6 +120,8 @@ class Belebele(Task):
 
 
 class SIB200(Task):
+    text_fields = ("text",)
+
     def example(self, row: Row, index: int, language: str) -> Example:
         gold = SIB_CATEGORIES.index(row["category"])
         return self._choice(
@@ -119,6 +130,8 @@ class SIB200(Task):
 
 
 class InjongoIntent(Task):
+    text_fields = ("text",)
+
     def example(self, row: Row, index: int, language: str) -> Example:
         gold = INJONGO_INTENTS.index(row["intent"])
         example_id = str(row.get("example_id") or index)
@@ -126,6 +139,8 @@ class InjongoIntent(Task):
 
 
 class InjongoSlots(Task):
+    text_fields = ("text",)
+
     def example(self, row: Row, index: int, language: str) -> Example:
         example_id = str(row.get("example_id") or index)
         target = row["target"] or "none"
@@ -133,6 +148,8 @@ class InjongoSlots(Task):
 
 
 class AfriMGSM(Task):
+    text_fields = ("question",)
+
     def example(self, row: Row, index: int, language: str) -> Example:
         query = self.template.format(question=row["question"])
         return Example(str(index), language, query, str(row["answer_number"]))
@@ -142,6 +159,7 @@ class FloresPlus(Task):
     """eng -> xx. Source sentences come from the `eng_Latn` subset, aligned on `id`."""
 
     source_subset = "eng_Latn"
+    text_fields = ("source", "target")
 
     def load(
         self, loader: DataLoader, benchmark: BenchmarkSpec, language: str, split: str
@@ -159,6 +177,8 @@ class FloresPlus(Task):
 
 
 class AfriScienceMT(Task):
+    text_fields = ("source", "target")
+
     def example(self, row: Row, index: int, language: str) -> Example:
         query = self.template.format(language=prompt_name(language), text=row["source"])
         example_id = f"{row['paper_id']}-{row['sentence_id']}"
@@ -170,6 +190,8 @@ _WIKITEXT_HEADING = re.compile(r"^ = [^=].*[^=] = \n?$")
 
 class WikiTextPerplexity(Task):
     """Raw WikiText rows are lines; they are regrouped into articles (one example each)."""
+
+    text_fields = ("text",)
 
     def load(
         self, loader: DataLoader, benchmark: BenchmarkSpec, language: str, split: str
