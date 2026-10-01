@@ -10,3 +10,6 @@ build/
 # Per-example predictions are large and regenerable from the manifest + cache.
 results/runs/
 results/.identity_cache.json
+
+# Local secrets (HF_TOKEN). Never commit.
+.env
