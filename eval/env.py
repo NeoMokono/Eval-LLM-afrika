@@ -5,9 +5,13 @@ from __future__ import annotations
 import os
 from pathlib import Path
 
+# Only Hugging Face settings are read. A shared .env may also hold training-side credentials
+# (experiment trackers etc.); those must never reach the evaluation process.
+ALLOWED_PREFIXES = ("HF_", "HUGGINGFACE_")
+
 
 def load_dotenv(path: Path) -> list[str]:
-    """Set variables from `path` that are not already in the environment.
+    """Set allowed variables from `path` that are not already in the environment.
 
     Understands `KEY=value`, `export KEY=value`, comments and surrounding quotes. Returns the
     names it set (never the values).
@@ -23,7 +27,7 @@ def load_dotenv(path: Path) -> list[str]:
         key, value = key.strip(), value.strip()
         if len(value) >= 2 and value[0] == value[-1] and value[0] in "\"'":
             value = value[1:-1]
-        if key and key not in os.environ:
+        if key.startswith(ALLOWED_PREFIXES) and key not in os.environ:
             os.environ[key] = value
             loaded.append(key)
     return loaded
