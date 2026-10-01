@@ -5,6 +5,7 @@ description = "Evaluation suite for AfriGemma: cached, reference-anchored benchm
 readme = "docs/EVAL_ARCHITECTURE.md"
 requires-python = ">=3.11"
 dependencies = [
+    "huggingface_hub==2.0.0",
     "pydantic==2.13.5",
     "pyyaml==6.0.3",
 ]
@@ -16,7 +17,7 @@ dev = [
 ]
 
 [project.scripts]
-afrigemma-eval = "cli:main"
+afrigemma-eval = "cli:entrypoint"
 
 [build-system]
 requires = ["hatchling"]
