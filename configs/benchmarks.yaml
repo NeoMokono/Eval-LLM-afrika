@@ -63,7 +63,7 @@ benchmarks:
     capability: topic_classification
     metric: accuracy
     extra_metrics: [macro_f1]
-    chance_level: 0.1428571429 # 7 topics, per the build prompt; TODO(verify) label set in Phase 3
+    chance_level: 0.1428571429 # 7 topics (verified)
     bucket: seen_task
     # `aka_Latn` is a separate subset from `twi_Latn` and is not used (would double-count Twi).
     languages: [afr, amh, ary, arz, bam, eng, ewe, fon, fra, hau, ibo, kin, lin, lug, luo, mos,
@@ -77,7 +77,7 @@ benchmarks:
               swa: swh_Latn, tir: tir_Ethi, tsn: tsn_Latn, tso: tso_Latn, twi: twi_Latn,
               wol: wol_Latn, xho: xho_Latn, yor: yor_Latn, zul: zul_Latn}
     split: test
-    fewshot_split: train
+    fewshot_split: validation
     license: cc-by-sa-4.0
 
   - id: belebele
@@ -97,7 +97,7 @@ benchmarks:
               ssw: ssw_Latn, swa: swh_Latn, tir: tir_Ethi, tsn: tsn_Latn, tso: tso_Latn,
               wol: wol_Latn, xho: xho_Latn, yor: yor_Latn, zul: zul_Latn}
     split: test
-    fewshot_split: null # the dataset only ships a test split; few-shot handling decided in Phase 3
+    fewshot_split: null # only a test split exists: shots come from other test passages
     license: cc-by-sa-4.0
 
   - id: injongo
@@ -106,13 +106,28 @@ benchmarks:
     type: classification
     capability: intent
     metric: accuracy
-    extra_metrics: [slot_f1] # slot spans are in the `spans` column of the same dataset
-    chance_level: 0.025 # 40 intents (verified on zul/eng/xho/sot test); TODO(verify) all configs
+    chance_level: 0.025 # 40 intents (verified on zul/eng/xho/sot test)
+    bucket: held_out
+    languages: [amh, eng, ewe, hau, ibo, kin, lin, lug, orm, sna, sot, swa, twi, wol, xho, yor,
+                zul]
+    split: test
+    fewshot_split: train # `eng` has no validation split, so train is the common source
+    license: apache-2.0
+
+  - id: injongo_slots
+    # Slot filling on the same dataset: gold is the `target` column
+    # ("LABEL: value $$ LABEL: value", 22 slot labels), scored with span F1.
+    dataset: masakhane/InjongoIntent
+    revision: fe4be3882a1614161dfe231ec793197bb74f4b44
+    type: generation
+    capability: slot_filling
+    metric: slot_f1
     bucket: held_out
     languages: [amh, eng, ewe, hau, ibo, kin, lin, lug, orm, sna, sot, swa, twi, wol, xho, yor,
                 zul]
     split: test
     fewshot_split: train
+    max_new_tokens: 128
     license: apache-2.0
 
   - id: flores_plus
@@ -122,11 +137,10 @@ benchmarks:
     capability: translation
     metric: chrf++
     bucket: seen_task
-    # eng -> xx. Target languages from the devtest/ file listing. Gated: needs HF_TOKEN.
-    # TODO(verify): config naming and columns once a token is available (repo is gated).
-    # Twi ships as two variants: twi_Latn_akua1239 (Akuapem) and twi_Latn_asan1239 (Asante).
-    # Akuapem chosen; TODO(verify) in Phase 3 that it is the FLORES-200 lineage by matching
-    # SIB-200's twi_Latn sentences, so FLORES+ and SIB-200 Twi refer to the same text.
+    # eng -> xx (source rows from eng_Latn, aligned on `id`). Gated: needs HF_TOKEN.
+    # Twi ships as two variants. twi_Latn_akua1239 (Akuapem) is the FLORES-200 lineage: all 204
+    # SIB-200 twi_Latn test sentences appear in it verbatim (2/204 in the Asante file).
+    # Note: the SFT mix trained fra->xx, not eng->xx, for bam, bbj, ewe, fon, mos and wol.
     languages: [afr, amh, ary, arz, bam, ewe, fon, fra, hau, ibo, kin, lin, lug, luo, mos, nso,
                 nya, orm, plt, run, sna, som, sot, ssw, swa, tir, tsn, tso, twi, wol, xho, yor,
                 zul]

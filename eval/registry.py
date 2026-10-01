@@ -269,12 +269,12 @@ class Bucket(StrEnum):
     RETENTION = "retention"
 
 
-Metric = Literal["accuracy", "exact_match", "chrf++", "perplexity"]
-ExtraMetric = Literal["macro_f1", "slot_f1"]
+Metric = Literal["accuracy", "exact_match", "chrf++", "slot_f1", "perplexity"]
+ExtraMetric = Literal["macro_f1"]
 
 _METRICS_BY_TYPE: dict[TaskType, set[str]] = {
     TaskType.CLASSIFICATION: {"accuracy"},
-    TaskType.GENERATION: {"exact_match", "chrf++"},
+    TaskType.GENERATION: {"exact_match", "chrf++", "slot_f1"},
     TaskType.PERPLEXITY: {"perplexity"},
 }
 # Metrics with a meaningful chance level (invariant 6); the others must not carry one.
@@ -345,7 +345,7 @@ class BenchmarkSpec(_Strict):
         elif self.chance_level is not None:
             raise ValueError(f"metric {self.metric} has no chance level; remove chance_level")
         if self.extra_metrics and self.type is not TaskType.CLASSIFICATION:
-            raise ValueError("extra_metrics (macro_f1, slot_f1) only apply to classification")
+            raise ValueError("extra_metrics (macro_f1) only apply to classification")
 
         if self.dataset.startswith("local:"):
             if not Path(self.dataset.removeprefix("local:")).is_absolute():
@@ -494,6 +494,7 @@ class RunConfig(_Strict):
     benchmarks_file: str = "benchmarks.yaml"
     models: list[str] = Field(default_factory=list)
     benchmarks: list[str] = Field(min_length=1)
+    limit: int | None = Field(default=None, gt=0)  # cap examples per language (smoke runs)
     prompting: Prompting = Field(default_factory=Prompting)
     force_rerun_all: bool = False
     force_rerun: list[ForceRerun] = Field(default_factory=list)

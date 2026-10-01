@@ -11,8 +11,9 @@ benchmarks_file: benchmarks.yaml
 # afrigemma-top40-gold-step3999, afrigemma-top40-gold-step1999.
 models: [afrigemma-top40-gold-step6499]
 
-benchmarks: [afrixnli, afrimmlu, afrimgsm, sib200, belebele, injongo, flores_plus,
-             afriscience_mt, english_mmlu, english_perplexity]
+benchmarks: [afrixnli, afrimmlu, afrimgsm, sib200, belebele, injongo, injongo_slots,
+             flores_plus, afriscience_mt, english_mmlu, english_perplexity]
+# limit: 50 # cap examples per language for smoke/timing runs (part of the fingerprint)
 # Not selectable yet: afrimcqa (scaffold, needs image input).
 
 prompting:

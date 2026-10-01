@@ -55,6 +55,22 @@ LANGUAGE_NAMES: dict[str, str] = {
     "zul": "isiZulu",
 }
 
+# English reference names used inside prompts ("Translate ... to Zulu"). The training prompts
+# and lm-evaluation-harness both use English exonyms; report tables use LANGUAGE_NAMES.
+_PROMPT_NAME_OVERRIDES: dict[str, str] = {
+    "nbl": "South Ndebele",
+    "nso": "Northern Sotho",
+    "sot": "Southern Sotho",
+    "ssw": "Swati",
+    "tsn": "Tswana",
+    "tso": "Tsonga",
+    "ven": "Venda",
+    "xho": "Xhosa",
+    "zul": "Zulu",
+    "luo": "Luo",
+    "run": "Rundi",
+}
+
 SOUTH_AFRICAN: frozenset[str] = frozenset(
     {"afr", "nbl", "nso", "sot", "ssw", "tsn", "tso", "ven", "xho", "zul"}
 )
@@ -125,3 +141,9 @@ def normalize(code: str) -> str:
 
 def display_name(code: str) -> str:
     return LANGUAGE_NAMES[normalize(code)]
+
+
+def prompt_name(code: str) -> str:
+    """The English name of a language as written inside prompts."""
+    canonical = normalize(code)
+    return _PROMPT_NAME_OVERRIDES.get(canonical, LANGUAGE_NAMES[canonical])

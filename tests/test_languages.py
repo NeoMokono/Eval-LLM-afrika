@@ -1,6 +1,12 @@
 import pytest
 
-from eval.languages import SOUTH_AFRICAN, UnknownLanguageError, display_name, normalize
+from eval.languages import (
+    SOUTH_AFRICAN,
+    UnknownLanguageError,
+    display_name,
+    normalize,
+    prompt_name,
+)
 
 
 @pytest.mark.parametrize(
@@ -43,3 +49,9 @@ def test_south_african_codes_are_canonical() -> None:
 
 def test_display_name() -> None:
     assert display_name("swh_Latn") == "Swahili"
+
+
+def test_prompt_names_are_english_exonyms() -> None:
+    assert prompt_name("zul_Latn") == "Zulu"
+    assert prompt_name("tsn") == "Tswana"
+    assert prompt_name("hau") == "Hausa"

@@ -153,6 +153,7 @@ def build_plan(
                     template=templates(bench),
                     prompting=config.run.prompting,
                     shots=shots,
+                    limit=config.run.limit,
                     harness=harness,
                 )
                 key = ManifestKey.of(model.id, bench.id, fp)

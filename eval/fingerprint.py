@@ -220,6 +220,7 @@ def compute_fingerprint(
     template: PromptTemplate,
     prompting: Prompting,
     shots: int,
+    limit: int | None = None,
     harness: str | None = None,
 ) -> Fingerprint:
     is_mc = benchmark.type is TaskType.CLASSIFICATION
@@ -254,6 +255,7 @@ def compute_fingerprint(
             "mc_scoring": prompting.mc_scoring if is_mc else None,
         },
         "shots": shots,
+        "limit": limit,
         "decoding": decoding,
         "harness_version": harness if harness is not None else harness_version(),
     }
