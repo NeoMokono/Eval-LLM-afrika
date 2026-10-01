@@ -15,6 +15,14 @@ dev = [
     "pytest==9.1.1",
     "ruff==0.16.9",
 ]
+# Real inference and dataset loading. Not needed for planning, the mock backend or reports.
+hf = [
+    "accelerate==1.15.0",
+    "datasets==5.0.1",
+    "peft==0.21.2",
+    "torch==2.14.1",
+    "transformers==5.18.0",
+]
 
 [project.scripts]
 afrigemma-eval = "cli:entrypoint"
@@ -30,6 +38,10 @@ only-include = ["eval", "report", "cli.py"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-q"
+markers = [
+    "smoke: loads a tiny real model through the Transformers backend (needs the hf extra)",
+]
+filterwarnings = ["ignore::DeprecationWarning", "ignore::FutureWarning"]
 
 [tool.ruff]
 line-length = 100
