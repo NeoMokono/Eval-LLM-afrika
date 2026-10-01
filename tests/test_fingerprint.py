@@ -257,3 +257,9 @@ def test_s3_checkpoints_fail_clearly(tmp_path: Path) -> None:
     )
     with pytest.raises(FingerprintError, match="not implemented yet"):
         checkpoint_identity(models.get("rung2"), models, resolver=FakeResolver())
+
+
+def test_limit_is_part_of_the_fingerprint() -> None:
+    limited = _fp(limit=50)
+    assert limited.value != _fp().value
+    assert "limit" in changed_fields(_fp().components, limited.components)
