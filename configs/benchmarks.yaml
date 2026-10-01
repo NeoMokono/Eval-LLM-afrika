@@ -124,17 +124,19 @@ benchmarks:
     bucket: seen_task
     # eng -> xx. Target languages from the devtest/ file listing. Gated: needs HF_TOKEN.
     # TODO(verify): config naming and columns once a token is available (repo is gated).
-    # TODO(decide): Twi ships as two variants (twi_Latn_akua1239 Akuapem, twi_Latn_asan1239
-    # Asante); Twi is left out until one is chosen.
+    # Twi ships as two variants: twi_Latn_akua1239 (Akuapem) and twi_Latn_asan1239 (Asante).
+    # Akuapem chosen; TODO(verify) in Phase 3 that it is the FLORES-200 lineage by matching
+    # SIB-200's twi_Latn sentences, so FLORES+ and SIB-200 Twi refer to the same text.
     languages: [afr, amh, ary, arz, bam, ewe, fon, fra, hau, ibo, kin, lin, lug, luo, mos, nso,
-                nya, orm, plt, run, sna, som, sot, ssw, swa, tir, tsn, tso, wol, xho, yor, zul]
+                nya, orm, plt, run, sna, som, sot, ssw, swa, tir, tsn, tso, twi, wol, xho, yor,
+                zul]
     subsets: {afr: afr_Latn, amh: amh_Ethi, ary: ary_Arab, arz: arz_Arab, bam: bam_Latn,
               ewe: ewe_Latn, fon: fon_Latn, fra: fra_Latn, hau: hau_Latn, ibo: ibo_Latn,
               kin: kin_Latn, lin: lin_Latn, lug: lug_Latn, luo: luo_Latn, mos: mos_Latn,
               nso: nso_Latn, nya: nya_Latn, orm: gaz_Latn, plt: plt_Latn, run: run_Latn,
               sna: sna_Latn, som: som_Latn, sot: sot_Latn, ssw: ssw_Latn, swa: swh_Latn,
-              tir: tir_Ethi, tsn: tsn_Latn, tso: tso_Latn, wol: wol_Latn, xho: xho_Latn,
-              yor: yor_Latn, zul: zul_Latn}
+              tir: tir_Ethi, tsn: tsn_Latn, tso: tso_Latn, twi: twi_Latn_akua1239,
+              wol: wol_Latn, xho: xho_Latn, yor: yor_Latn, zul: zul_Latn}
     split: devtest
     fewshot_split: dev
     license: cc-by-sa-4.0
@@ -189,11 +191,15 @@ benchmarks:
     license: mit
 
   - id: english_perplexity
-    enabled: false # TODO(decide): which held-out English text to use (open question)
-    dataset: local:/TODO/english-heldout.jsonl
+    # Public held-out English prose (not AfriInstruct, which is the SFT source). Gemma likely saw
+    # Wikipedia in pretraining, so read the before/after delta, not the absolute value.
+    dataset: Salesforce/wikitext
+    revision: b08601e04326c79dfdd32d625aee71d232d685c3
     type: perplexity
     capability: english_lm
     metric: perplexity
     bucket: retention
+    config: wikitext-103-raw-v1 # 4,358 test rows, single `text` column
     languages: [eng]
     split: test
+    license: cc-by-sa-3.0

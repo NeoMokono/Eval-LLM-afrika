@@ -12,8 +12,8 @@ benchmarks_file: benchmarks.yaml
 models: [afrigemma-top40-gold-step6499]
 
 benchmarks: [afrixnli, afrimmlu, afrimgsm, sib200, belebele, injongo, flores_plus,
-             afriscience_mt, english_mmlu]
-# Not selectable yet: afrimcqa (scaffold, needs image input), english_perplexity (no text chosen).
+             afriscience_mt, english_mmlu, english_perplexity]
+# Not selectable yet: afrimcqa (scaffold, needs image input).
 
 prompting:
   shots: [0, 5]

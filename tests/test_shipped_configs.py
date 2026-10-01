@@ -50,7 +50,6 @@ def test_classification_benchmarks_carry_chance(config) -> None:
 
 def test_scaffolds_are_disabled(config) -> None:
     assert not config.benchmarks.get("afrimcqa").enabled
-    assert not config.benchmarks.get("english_perplexity").enabled
 
 
 def test_agreed_thresholds(config) -> None:
