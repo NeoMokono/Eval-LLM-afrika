@@ -15,6 +15,7 @@ from __future__ import annotations
 import json
 import re
 from collections import Counter
+from collections.abc import Sequence
 from enum import StrEnum
 from pathlib import Path
 from typing import Annotated, Any, Literal, Self, TypeVar
@@ -499,8 +500,8 @@ class RunConfig(_Strict):
     thresholds: Thresholds = Field(default_factory=Thresholds)
     confusion: ConfusionTriggers = Field(default_factory=ConfusionTriggers)
     bootstrap: Bootstrap = Field(default_factory=Bootstrap)
-    results_dir: str = "results"
-    reports_dir: str = "reports"
+    results_dir: str = "../results"  # relative to run.yaml
+    reports_dir: str = "../reports"
 
     @model_validator(mode="before")
     @classmethod
@@ -557,13 +558,30 @@ class EvalConfig(BaseModel):
         disabled = [b for b in self.run.benchmarks if not self.benchmarks.get(b).enabled]
         if disabled:
             raise ValueError(f"run.yaml selects disabled benchmarks {disabled}")
-        selected = {m.id for m in self.selected_models}
-        for f in self.run.force_rerun:
-            if f.model not in selected:
-                raise ValueError(f"force_rerun model {f.model!r} is not part of this run")
-            if f.benchmark not in self.run.benchmarks:
-                raise ValueError(f"force_rerun benchmark {f.benchmark!r} is not part of this run")
+        problems = self.force_rerun_problems(self.run.force_rerun)
+        if problems:
+            raise ValueError("; ".join(problems))
         return self
+
+    def force_rerun_problems(self, entries: Sequence[ForceRerun]) -> list[str]:
+        """Why each forced (model, benchmark) pair is not part of this run, if it isn't."""
+        selected = {m.id for m in self.selected_models}
+        problems = []
+        for f in entries:
+            if f.model not in selected:
+                problems.append(f"force_rerun model {f.model!r} is not part of this run")
+            if f.benchmark not in self.run.benchmarks:
+                problems.append(f"force_rerun benchmark {f.benchmark!r} is not part of this run")
+        return problems
+
+    @property
+    def results_path(self) -> Path:
+        """results_dir, resolved relative to run.yaml's directory."""
+        return (self.config_dir / self.run.results_dir).resolve()
+
+    @property
+    def reports_path(self) -> Path:
+        return (self.config_dir / self.run.reports_dir).resolve()
 
     @property
     def selected_models(self) -> list[ModelSpec]:

@@ -48,5 +48,6 @@ bootstrap:
   seed: 0
   confidence: 0.95
 
-results_dir: results
-reports_dir: reports
+# Relative to this file.
+results_dir: ../results
+reports_dir: ../reports
