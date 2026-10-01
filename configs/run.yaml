@@ -5,10 +5,12 @@ run_id: 2026-10-01-top40-gold-vs-base
 models_file: models.yaml
 benchmarks_file: benchmarks.yaml
 
-# Targets / externals to evaluate. Every model under reference_models in models.yaml (base,
-# plain_baseline, extra references) is always included and served from cache once it has run.
+# Models to evaluate. base and plain_baseline (when present in models.yaml) are always included
+# and served from cache once they have run; extra `reference` models are opt-in here.
 # Other registered checkpoints of the same run: afrigemma-top40-gold-step5999,
 # afrigemma-top40-gold-step3999, afrigemma-top40-gold-step1999.
+# gemma-4-e2b-pt is registered but not run: its repo ships no chat template, so it cannot be
+# prompted the same way as the other models.
 models: [afrigemma-top40-gold-step6499]
 
 benchmarks: [afrixnli, afrimmlu, afrimgsm, sib200, belebele, injongo, injongo_slots,

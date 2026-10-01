@@ -586,9 +586,10 @@ class EvalConfig(BaseModel):
 
     @property
     def selected_models(self) -> list[ModelSpec]:
-        """Every reference model (always compared; served from cache once run), then the
-        targets/externals listed in run.yaml, in that order."""
-        chosen = [m.id for m in self.models.reference_models]
+        """Base and plain baseline (always compared; served from cache once run), then
+        whatever run.yaml lists: targets, externals and any extra `reference` models."""
+        required = {Role.BASE, Role.PLAIN_BASELINE}
+        chosen = [m.id for m in self.models.reference_models if m.role in required]
         chosen += [m for m in self.run.models if m not in chosen]
         return [self.models.get(m) for m in chosen]
 

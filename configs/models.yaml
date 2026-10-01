@@ -4,7 +4,8 @@
 #   plain_baseline  zero or one. Our default SFT recipe. Delete the entry if it doesn't exist
 #                   yet; the report then labels "beats our own recipe" claims as not yet verified.
 #                   Sign-off: project lead.
-#   reference       any number. Extra upstream checkpoints shown alongside (never used as base).
+#   reference       any number. Extra upstream checkpoints shown alongside (never used as base);
+#                   only evaluated when listed under `models` in run.yaml.
 #   target          the checkpoints under evaluation. Explicit paths only: never pick a
 #                   checkpoint via loss-based aliases.
 #   external        other teams' released models.

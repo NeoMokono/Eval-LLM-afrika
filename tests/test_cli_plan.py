@@ -44,6 +44,6 @@ def test_config_errors_exit_cleanly(tmp_path, capsys) -> None:
     assert "file not found" in capsys.readouterr().err
 
 
-def test_run_and_report_are_not_available_yet(workspace, capsys) -> None:
-    assert cli.main(["run", "--config", str(workspace.write())]) == 2
-    assert "Phase 7" in capsys.readouterr().err
+def test_report_is_not_available_yet(workspace, capsys) -> None:
+    assert cli.main(["report", "--config", str(workspace.write())]) == 2
+    assert "Phase 6" in capsys.readouterr().err

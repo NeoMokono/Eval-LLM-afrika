@@ -222,6 +222,11 @@ class HFBackend(ModelBackend):
         finally:
             handle.remove()
 
+    def _score_rows(
+        self, seqs: list[list[int]], targets: list[list[tuple[int, int]]], rows: list[int]
+    ) -> list[list[float]]:
+        return self._score([seqs[i] for i in rows], [targets[i] for i in rows])
+
     @torch.inference_mode()
     def _score(
         self, seqs: list[list[int]], targets: list[list[tuple[int, int]]]
@@ -237,8 +242,21 @@ class HFBackend(ModelBackend):
             for row, i in enumerate(batch):
                 for col, (pos, tok) in enumerate(targets[i]):
                     positions[row, col], tokens[row, col] = pos, tok
-            with self._only_positions(positions):
-                logits = self.model(input_ids=ids, attention_mask=mask).logits
+            try:
+                with self._only_positions(positions):
+                    logits = self.model(input_ids=ids, attention_mask=mask).logits
+            except torch.cuda.OutOfMemoryError:
+                # Halve the batch and retry; a single sequence that does not fit is fatal.
+                if len(batch) == 1:
+                    raise
+                del ids, mask, positions, tokens
+                torch.cuda.empty_cache()
+                half = len(batch) // 2
+                for part in (batch[:half], batch[half:]):
+                    scored = self._score_rows(seqs, targets, part)
+                    for i, values in zip(part, scored, strict=True):
+                        out[i] = values
+                continue
             logprobs = torch.log_softmax(logits.float(), dim=-1).gather(-1, tokens.unsqueeze(-1))
             values = logprobs.squeeze(-1).cpu().tolist()
             for row, i in enumerate(batch):
